@@ -31,12 +31,10 @@ router.post('/', (req, res, next) => {
 
 	product.save()
 	.then(product => {
-		if(product){
-			res.status(201).json({
-				message: "Product created successfully",
-				product: product
-			})
-		}
+		res.status(201).json({
+			message: "Product created successfully",
+			product: product
+		})
 	})
 	.catch(error => {
 		console.log(error)
@@ -74,13 +72,11 @@ router.patch('/:productId', (req, res, next) => {
 
 	const updateOptions = {}
 	for(const option of req.body){
-		console.log(option)
 		updateOptions[option.property] = option.value;
 	}
-	console.log(id)
-	console.log(updateOptions)
 
-	Product.update({ _id: id }, { $set: updateOptions })
+	console.log(updateOptions)
+	Product.updateMany({ _id: id }, { $set: updateOptions })
 	.exec()
 	.then(result => {
 		res.status(200).json({

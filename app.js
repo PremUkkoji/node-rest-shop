@@ -13,7 +13,7 @@ const url = "mongodb://" + process.env.dbuser + ":" + process.env.dbpass
             + "@ds353738.mlab.com:53738/node-rest-shop";
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
     .then(() => {
-        console.log('connected');
+        console.log('Successfully connected to MongoDB node-rest-shop');
     })
     .catch(err => {
         console.log(err);
