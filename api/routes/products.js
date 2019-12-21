@@ -7,13 +7,27 @@ const router = express.Router()
 
 router.get('/', (req, res, next) => {
 	Product.find()
+	.select('_id name price')
 	.exec()
 	.then(products => {
-		if(products.length > 0){
-			res.status(200).json({
-				products: products
+
+		const response = {
+			count: products.length,
+			products: products.map(product => {
+				return {
+					_id: product._id,
+					name: product.name,
+					price: product.price,
+					request: {
+						description: 'get product details',
+						type: 'GET',
+						url: 'http://localhost:3000/products/' + product._id
+					}
+				}
 			})
 		}
+
+		res.status(200).json(response)
 	})
 	.catch(error => {
 		res.status(500).json({
@@ -31,10 +45,33 @@ router.post('/', (req, res, next) => {
 
 	product.save()
 	.then(product => {
-		res.status(201).json({
+		const response = {
 			message: "Product created successfully",
-			product: product
-		})
+			product: {
+				_id: product._id,
+				name: product.name,
+				price: product.price
+			},
+			request: [
+				{
+					description: 'get product details',
+					type: 'GET',
+					url: 'http://localhost:3000/products/' + product._id
+				},
+				{
+					description: 'remove product',
+					type: 'DELETE',
+					url: 'http://localhost:3000/products/' + product._id
+				},
+				{
+					description: 'update product details',
+					type: 'UPDATE',
+					url: 'http://localhost:3000/products/' + product._id
+				}
+			]
+		}
+
+		res.status(201).json(response)
 	})
 	.catch(error => {
 		console.log(error)
@@ -48,12 +85,30 @@ router.get('/:productId', (req, res, next) => {
 	const id = req.params.productId
 
 	Product.findById(id)
+	.select('_id name price')
 	.exec()
 	.then(product => {
 		if(product){
-			res.status(200).json({
-				product: product
-			})
+
+			const response = {
+				_id: product._id,
+				name: product.name,
+				price: product.price,
+				request: [
+					{
+						description: 'remove product',
+						type: 'DELETE',
+						url: 'http://localhost:3000/products/' + product._id
+					},
+					{
+						description: 'update product details',
+						type: 'UPDATE',
+						url: 'http://localhost:3000/products/' + product._id
+					}
+				]
+			}
+
+			res.status(200).json(response)
 		}else{
 			res.status(404).json({
 				message: "Product not found"
@@ -75,14 +130,20 @@ router.patch('/:productId', (req, res, next) => {
 		updateOptions[option.property] = option.value;
 	}
 
-	console.log(updateOptions)
 	Product.updateMany({ _id: id }, { $set: updateOptions })
 	.exec()
 	.then(result => {
-		res.status(200).json({
+
+		const response = {
 			message: "Product updated successfully",
-			result: result
-		})
+			request: {
+				description: 'get product details',
+				type: 'GET',
+				url: 'http://localhost:3000/products/' + id
+			}
+		}
+
+		res.status(200).json(response)
 	})
 	.catch(error => {
 		res.status(500).json({
@@ -97,9 +158,21 @@ router.delete('/:productId', (req, res, next) => {
 	Product.remove({ _id: id })
 	.exec()
 	.then(result => {
-		res.status(200).json({
-			result: result
-		})
+
+		const response = {
+			message: 'Product removed',
+			request: {
+				description: 'create product',
+				type: 'POST',
+				url: 'http://localhost:3000/products/',
+				body: {
+					name: 'String',
+					price: 'Number'
+				}
+			}
+		}
+
+		res.status(200).json(response)
 	})
 	.catch(error => {
 		res.status(500).json({
