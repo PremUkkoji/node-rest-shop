@@ -109,10 +109,6 @@ router.get('/:productId', (req, res, next) => {
 			}
 
 			res.status(200).json(response)
-		}else{
-			res.status(404).json({
-				message: "Product not found"
-			})
 		}
 	})
 	.catch(error => {
